@@ -5,7 +5,7 @@ import glob
 
 class Data:
 
-    def __init__(self, filename):
+    def __init__(self, filename, no_of_wells_x, no_of_wells_y):
         '''
             Load zebrafish images for analysis
             it can be:
@@ -16,6 +16,8 @@ class Data:
         iterator = cv2.VideoCapture(filename)
 
         self.__iterator = iterator
+        self.no_of_wells_x = no_of_wells_x
+        self.no_of_wells_y = no_of_wells_y
 
     def reset(self):
         '''
@@ -61,7 +63,7 @@ class Data:
         # reset the video to its initial frame
         self.reset()
 
-    def find_wells(self, image = None, number_of_wells = 96, number_of_plates = 4):
+    def find_wells(self, image = None):
         '''
             Detect wells using the hough_circles algorithm
 

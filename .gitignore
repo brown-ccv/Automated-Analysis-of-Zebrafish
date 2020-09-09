@@ -1,3 +1,4 @@
 .ipynb
 .ipynb_checkpoints
 Test_analysis.ipynb
+__pycache__
