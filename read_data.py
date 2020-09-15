@@ -28,15 +28,15 @@ class Data:
 
     def read(self):
         '''
-            Get the next images
+            Get the next image
         '''
         ret, frame = self.__iterator.read()
         # if frame is read correctly ret is True
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
-            return None
+            return ret, frame
 
-        return frame
+        return ret, frame
 
 
     def show(self):
