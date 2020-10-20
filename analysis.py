@@ -10,6 +10,13 @@ import pandas as pd
 class analysis:
 
     def __init__(self, Data_to_analyze):
+        '''
+            This class sets up pre-processing routines to be fed into deeplabcut
+            or tensorflow for training or inference
+
+            input :
+                Data_to_analyze : A read_data class with loaded data
+        '''
 
         if not isinstance(Data_to_analyze, Data):
             raise TypeError('Data_to_analyze is not of type Data')
@@ -20,8 +27,23 @@ class analysis:
         '''
             Detect all the wells which satisfy minRadius < well_radius < maxRadius
             using the HoughCircles method.
+
+            input :
+                R = [minRadius, maxRadius]
+                image = specific image where the wells need to be detected
+                        if (None) : take the first image from the folder
+            output :
+                wells : Pandas dataframe indicating well locations
+                        DataFrame Discription :
+                            columns = { 'well_id_x' - x-coordinate of the well,
+                                        'well_id_y' - y-coordinate of the well,
+                                        'center_x' - x-coordinate of the center pixel of well,
+                                        'center_y' - y-coordinate of the center pixel of well,
+                                        'radius' - radius of the well}
         '''
 
+
+        # initialize the image for well detection
         if image is None:
             ret, image = self.__Data.read()
             if not ret:
@@ -30,6 +52,7 @@ class analysis:
             # reset the video to its initial frame
             self.__Data.reset()
 
+        # workflow for detecting wells
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         wells = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 150, minRadius = int(R[0]), maxRadius = int(R[1]))
         wells = sorted(wells[0], key = lambda x: (x[0], x[1]))
@@ -62,6 +85,7 @@ class analysis:
 
         wells.replace({'well_id_x' : dict(zip(sorted(median_x), np.arange(0, len(median_x), 1, dtype = np.int16)))}, inplace = True)
         wells.replace({'well_id_y' : dict(zip(sorted(median_y), np.arange(0, len(median_y), 1, dtype = np.int16)))}, inplace = True)
+        wells['radius'] = np.ceil(wells['radius'].median())
 
         wells.set_index(['well_id_x', 'well_id_y'], inplace = True)
 
@@ -70,6 +94,10 @@ class analysis:
     def plot_wells(self, wells, image = None):
         '''
             Once you've detected the wells you can plot them using this function
+
+            input :
+                wells : pandas dictionary of detected wells
+                image : specific image on which wells are to be plotted
         '''
 
         if image is None:
@@ -87,9 +115,17 @@ class analysis:
         for circle in wells:
             ax.add_artist(plt.Circle((circle[0], circle[1]), circle[2]))
 
-    def crop_wells(self, wells, full_dataset = True, image = None, crop_dir = None):
+
+    def crop_to_video(self, wells, crop_dir = None):
         '''
-            Crop each of the wells into single images and write them to files
+            Crop each of the wells into single images and write them as a video
+
+            input :
+                wells : pandas dictionary of detected wells
+                crop_dir : locations where the videos are to be stored
+
+            output :
+                filenames : locations of all filenames
         '''
 
         if not crop_dir:
@@ -103,62 +139,62 @@ class analysis:
             if e.errno != errno.EEXIST:
                 raise e
 
-        print('Creating separate directories for each of the wells')
-
         well_no = 0
-        for i in range(len(wells)):
-            try:
-                well_ind = np.unravel_index(well_no, (self.__Data.no_of_wells_x,
-                                                            self.__Data.no_of_wells_y))
-                os.makedirs(os.path.join(path, '{:02d}_{:02d}'.format(well_ind[0], well_ind[1])))
-                well_no += 1
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise e
+        VideoWriter = {}
+        height, width, channels = self.__Data.get_shape()
+        size = (height, width)
 
-        print('created relevant directories')
+        # create videowriter elements foreach of the wells
+        filenames = []
+        for well_ind in wells.index.values.tolist():
+            filename = os.path.join(path,
+                                    '{:02d}_{:02d}.avi'.format(int(well_ind[0]), int(well_ind[1])))
+            filenames.append(filename)
+            VideoWriter[well_ind] = cv2.VideoWriter(filename,
+                                                    cv2.VideoWriter_fourcc(*'DIVX'),
+                                                    1,
+                                                    (2*int(wells.loc[well_ind]['radius']),
+                                                    2*int(wells.loc[well_ind]['radius'])))
 
-        print ('Saving cropped images in {}'.format(path))
+        print ('Saving cropped images in {} as a videos'.format(path))
 
-        if (full_dataset):
-            self.__Data.reset()
-            counter = 0
-            counter2 = 0
-            while (True):
-                counter += 1
-                well_no = 0
-                ret, image = self.__Data.read()
-                if not ret:
-                    print("Can't receive frame (stream end?). Exiting ...")
-                    break
+        self.__Data.reset()
+        while (True):
+            ret, image = self.__Data.read()
+            if not ret:
+                print("Can't receive frame (stream end?). Exiting ...")
+                break
 
-                for well in wells:
-                    cropped = image[int(well[1]-well[2]):int(well[1]+well[2]),
-                                        int(well[0]-well[2]):int(well[0]+well[2]), :]
-                    well_ind = np.unravel_index(well_no, (self.__Data.no_of_wells_x,
-                                                                self.__Data.no_of_wells_y))
-                    filename = os.path.join(path, '{:02d}_{:02d}'.format(well_ind[0], well_ind[1]),
-                                                'IMG_{:04d}.jpg'.format(counter))
-                    cv2.imwrite(filename, cropped)
-                    counter2 += 1
-                    well_no += 1
-        else:
-            if image is None:
-                raise ValueError("An image needs to provided to crop or set all = True")
+            for well_ind in wells.index.values.tolist():
+                xc, yc, r = wells.loc[well_ind]
+                cropped = image[int(yc)-int(r):int(yc)+int(r), int(xc)-int(r):int(xc)+int(r), :]
+                VideoWriter[well_ind].write(cropped)
 
-            counter = 1
-            well_no = 0
-            counter2 = 0
+        for _, w in VideoWriter.items():
+            w.release()
 
-            for well in wells:
-                cropped = image[int(well[1]-well[2]):int(well[1]+well[2]),
-                                    int(well[0]-well[2]):int(well[0]+well[2]), :]
-                well_ind = np.unravel_index(well_no, (self.__Data.no_of_wells_x,
-                                                            self.__Data.no_of_wells_y))
-                filename = os.path.join(path, '{:02d}_{:02d}'.format(well_ind[0], well_ind[1]),
-                                    'IMG_{:04d}.jpg'.format(counter))
-                cv2.imwrite(filename, cropped)
-                well_no += 1
-                counter2 +=1
+        print('Wrote {} videos to {}'.format(len(VideoWriter), path))
 
-        print('Wrote {} files to {}'.format(counter2, path))
+        return filenames
+
+    def crop_wells(self, wells, image):
+        '''
+            crop each image and return a numpy array
+
+            input :
+                wells : pandas dictionary of detected wells
+                image : image to be cropped
+
+            output :
+                cropped_wells : a numpy array of cropped images
+        '''
+
+        cropped_images = np.full((len(wells.index), 2*int(wells.loc[(0, 0)]['radius']),
+                                        2*int(wells.loc[(0, 0)]['radius']), 3), 0)
+
+        for i, well_ind in enumerate(wells.index.values.tolist()):
+            xc, yc, r = wells.loc[well_ind]
+            cropped = image[int(yc)-int(r):int(yc)+int(r), int(xc)-int(r):int(xc)+int(r), :]
+            cropped_images[i, :, :, :] = cropped
+
+        return wells.index.values.tolist(), cropped_images

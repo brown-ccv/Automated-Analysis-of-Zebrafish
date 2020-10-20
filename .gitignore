@@ -6,3 +6,6 @@ cropped_images
 *.csv
 *.png
 *.gsheet
+exported_models
+DLC_integration
+model_serving

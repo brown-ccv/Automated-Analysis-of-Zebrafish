@@ -86,19 +86,16 @@ class Data:
 
         return wells
 
-    # def background_subtraction(method):
-    #
-    #     fgbg = method()
-    #
-    #     while (True):
-    #
-    #         ret, frame = Data._iterator.read()
-    #         if not read:
-    #             print("Can't receive frame (stream end?). Exiting ...")
-    #             break
-    #
-    #         fmask = fgbg.apply(frame)
-    #
-    # def adaptive_threshholding(method, threshhold_type):
-    #
-    #     fmask =
+    def get_shape(self):
+        '''
+            Get the shape of images
+        '''
+        ret, frame = self.__iterator.read()
+        # if frame is read correctly ret is True
+        if not ret:
+            print("Can't receive frame (stream end?). Exiting ...")
+            return None, None, None
+
+        self.reset()
+
+        return frame.shape
