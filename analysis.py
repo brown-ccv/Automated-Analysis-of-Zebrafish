@@ -64,30 +64,7 @@ class analysis:
         # However, it is nacessary to label the wells based on their (x, y) coordinates in the images
         # So that they can be directly referenced later
 
-        x_ref = wells[0, 2]; y_ref= wells[0, 3]; r_ref = wells[0, 4]
-        x_ind = np.nonzero((wells[:, 2] > x_ref - r_ref) & (wells[:, 2] < x_ref + r_ref))[0]
-        y_ind = np.nonzero((wells[:, 3] > y_ref - r_ref) & (wells[:, 3] < y_ref + r_ref))[0]
-
-        median_x = []
-        median_y = []
-
-        for index in x_ind:
-            median = np.median(wells[(wells[:, 3] > (wells[index, 3] - r_ref)) & (wells[:, 3] < (wells[index, 3] + r_ref)), 3])
-            wells[(wells[:, 3] > (wells[index, 3] - r_ref)) & (wells[:, 3] < (wells[index, 3] + r_ref)), 1] = median
-            median_y.append(median)
-
-        for index in y_ind:
-            median = np.median(wells[(wells[:, 2] > (wells[index, 2] - r_ref)) & (wells[:, 2] < (wells[index, 2] + r_ref)), 2])
-            wells[(wells[:, 2] > (wells[index, 2] - r_ref)) & (wells[:, 2] < (wells[index, 2] + r_ref)), 0] = median
-            median_x.append(median)
-
-        wells = pd.DataFrame(wells, columns=['well_id_x', 'well_id_y', 'center_x', 'center_y', 'radius'])
-
-        wells.replace({'well_id_x' : dict(zip(sorted(median_x), np.arange(0, len(median_x), 1, dtype = np.int16)))}, inplace = True)
-        wells.replace({'well_id_y' : dict(zip(sorted(median_y), np.arange(0, len(median_y), 1, dtype = np.int16)))}, inplace = True)
-        wells['radius'] = np.ceil(wells['radius'].median())
-
-        wells.set_index(['well_id_x', 'well_id_y'], inplace = True)
+        self.__organize_wells(wells)
 
         return wells
 
@@ -198,3 +175,34 @@ class analysis:
             cropped_images[i, :, :, :] = cropped
 
         return wells.index.values.tolist(), cropped_images
+
+    def __organize_wells(self, wells):
+        '''
+            Label the (x, y) coordinates for each well
+        '''
+
+
+        x_ref = wells[0, 2]; y_ref= wells[0, 3]; r_ref = wells[0, 4]
+        x_ind = np.nonzero((wells[:, 2] > x_ref - r_ref) & (wells[:, 2] < x_ref + r_ref))[0]
+        y_ind = np.nonzero((wells[:, 3] > y_ref - r_ref) & (wells[:, 3] < y_ref + r_ref))[0]
+
+        median_x = []
+        median_y = []
+
+        for index in x_ind:
+            median = np.median(wells[(wells[:, 3] > (wells[index, 3] - r_ref)) & (wells[:, 3] < (wells[index, 3] + r_ref)), 3])
+            wells[(wells[:, 3] > (wells[index, 3] - r_ref)) & (wells[:, 3] < (wells[index, 3] + r_ref)), 1] = median
+            median_y.append(median)
+
+        for index in y_ind:
+            median = np.median(wells[(wells[:, 2] > (wells[index, 2] - r_ref)) & (wells[:, 2] < (wells[index, 2] + r_ref)), 2])
+            wells[(wells[:, 2] > (wells[index, 2] - r_ref)) & (wells[:, 2] < (wells[index, 2] + r_ref)), 0] = median
+            median_x.append(median)
+
+        wells = pd.DataFrame(wells, columns=['well_id_x', 'well_id_y', 'center_x', 'center_y', 'radius'])
+
+        wells.replace({'well_id_x' : dict(zip(sorted(median_x), np.arange(0, len(median_x), 1, dtype = np.int16)))}, inplace = True)
+        wells.replace({'well_id_y' : dict(zip(sorted(median_y), np.arange(0, len(median_y), 1, dtype = np.int16)))}, inplace = True)
+        wells['radius'] = np.ceil(wells['radius'].median())
+
+        wells.set_index(['well_id_x', 'well_id_y'], inplace = True)
