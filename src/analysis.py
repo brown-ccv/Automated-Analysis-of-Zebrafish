@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import os
 import errno
 import pandas as pd
+import random
 
 class analysis:
 
@@ -64,9 +65,7 @@ class analysis:
         # However, it is nacessary to label the wells based on their (x, y) coordinates in the images
         # So that they can be directly referenced later
 
-        self.__organize_wells(wells)
-
-        return wells
+        return self.__label_wells(wells)
 
     def plot_wells(self, wells, image = None):
         '''
@@ -93,7 +92,7 @@ class analysis:
             ax.add_artist(plt.Circle((circle[0], circle[1]), circle[2]))
 
 
-    def crop_to_video(self, wells, crop_dir = None):
+    def crop_to_video(self, wells, crop_dir = None, no_wells_to_record = 6):
         '''
             Crop each of the wells into single images and write them as a video
 
@@ -123,7 +122,8 @@ class analysis:
 
         # create videowriter elements foreach of the wells
         filenames = []
-        for well_ind in wells.index.values.tolist():
+        random_wells = random.sample(wells.index.values.tolist(), no_wells_to_record)
+        for well_ind in random_wells:
             filename = os.path.join(path,
                                     '{:02d}_{:02d}.avi'.format(int(well_ind[0]), int(well_ind[1])))
             filenames.append(filename)
@@ -142,7 +142,7 @@ class analysis:
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
 
-            for well_ind in wells.index.values.tolist():
+            for well_ind in random_wells:
                 xc, yc, r = wells.loc[well_ind]
                 cropped = image[int(yc)-int(r):int(yc)+int(r), int(xc)-int(r):int(xc)+int(r), :]
                 VideoWriter[well_ind].write(cropped)
@@ -151,6 +151,8 @@ class analysis:
             w.release()
 
         print('Wrote {} videos to {}'.format(len(VideoWriter), path))
+
+        self.__Data.reset()
 
         return filenames
 
@@ -176,7 +178,7 @@ class analysis:
 
         return wells.index.values.tolist(), cropped_images
 
-    def __organize_wells(self, wells):
+    def __label_wells(self, wells):
         '''
             Label the (x, y) coordinates for each well
         '''
@@ -206,3 +208,5 @@ class analysis:
         wells['radius'] = np.ceil(wells['radius'].median())
 
         wells.set_index(['well_id_x', 'well_id_y'], inplace = True)
+
+        return wells

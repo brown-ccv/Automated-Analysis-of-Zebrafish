@@ -5,7 +5,7 @@ import glob
 
 class Data:
 
-    def __init__(self, filename, no_of_wells_x, no_of_wells_y):
+    def __init__(self, filename):
         '''
             Load zebrafish images for analysis
             it can be:
@@ -27,7 +27,7 @@ class Data:
 
         self.__iterator.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
-    def read(self):
+    def read(self, plot = False):
         '''
             Get the next image
 
@@ -35,11 +35,16 @@ class Data:
                 ret : logical indicating if read was successful
                 frame : next frame
         '''
+
         ret, frame = self.__iterator.read()
         # if frame is read correctly ret is True
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             return ret, frame
+
+        if plot:
+            fig, ax = plt.subplots(figsize = (12, 12))
+            ax.imshow(frame)
 
         return ret, frame
 
