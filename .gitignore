@@ -1,10 +1,8 @@
-*.ipynb
 *.ipynb_checkpoints
 Test_analysis.ipynb
 __pycache__
 cropped_images
 *.csv
-*.png
 *.gsheet
 exported_models
 DLC_integration
