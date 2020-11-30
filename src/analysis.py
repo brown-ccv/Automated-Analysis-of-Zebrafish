@@ -46,7 +46,7 @@ class analysis:
 
         # initialize the image for well detection
         if image is None:
-            ret, image = self.__Data.read()
+            ret, image, _ = self.__Data.read()
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
                 return None
@@ -77,7 +77,7 @@ class analysis:
         '''
 
         if image is None:
-            ret, image = self.__Data.read()
+            ret, image, _ = self.__Data.read()
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
                 return None
@@ -137,7 +137,7 @@ class analysis:
 
         self.__Data.reset()
         while (True):
-            ret, image = self.__Data.read()
+            ret, image, _ = self.__Data.read()
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
@@ -158,7 +158,7 @@ class analysis:
 
     def crop_wells(self, wells, image):
         '''
-            crop each image and return a numpy array
+            crop each well and return a numpy array
 
             input :
                 wells : pandas dictionary of detected wells

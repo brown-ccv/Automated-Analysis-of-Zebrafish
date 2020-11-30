@@ -40,13 +40,15 @@ class Data:
         # if frame is read correctly ret is True
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
-            return ret, frame
+            return ret, frame, 0
 
         if plot:
             fig, ax = plt.subplots(figsize = (12, 12))
             ax.imshow(frame)
 
-        return ret, frame
+        frame_no = int(self.__iterator.get(cv2.CAP_PROP_POS_FRAMES))
+
+        return ret, frame, frame_no+1
 
     def get_shape(self):
         '''
@@ -55,7 +57,7 @@ class Data:
             output :
                 shape: shape of the images
         '''
-        ret, frame = self.__iterator.read()
+        ret, frame, _ = self.__iterator.read()
         # if frame is read correctly ret is True
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
@@ -64,6 +66,10 @@ class Data:
         self.reset()
 
         return frame.shape
+
+    def get_total_frames(self):
+
+        return int(self.__iterator.get(cv2.CAP_PROP_FRAME_COUNT))
 
 
     # def show(self):
