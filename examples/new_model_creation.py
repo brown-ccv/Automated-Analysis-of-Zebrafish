@@ -192,13 +192,12 @@ if __name__ == '__main__':
         f.close()
 
     print("Done")
-
-    maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model."))
     
     posefile, _, _ = deeplabcut.return_train_network_path(DLC_config)
     edits = {"save_iters": 15000, "display_iters": 1000}
     _ = deeplabcut.auxiliaryfunctions.edit_config(posefile, edits)
 
+    maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model. should be greater than 15000"))
 
     while True:
         
