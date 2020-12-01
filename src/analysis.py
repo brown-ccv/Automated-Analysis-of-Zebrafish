@@ -129,7 +129,7 @@ class analysis:
             filenames.append(filename)
             VideoWriter[well_ind] = cv2.VideoWriter(filename,
                                                     cv2.VideoWriter_fourcc(*'DIVX'),
-                                                    1,
+                                                    10,
                                                     (2*int(wells.loc[well_ind]['radius']),
                                                     2*int(wells.loc[well_ind]['radius'])))
 
