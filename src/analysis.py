@@ -1,5 +1,4 @@
 from read_data import Data
-from scipy.optimize import fsolve
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
