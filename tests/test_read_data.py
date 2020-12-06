@@ -14,6 +14,11 @@ def test_read(images):
     assert ret == True
     assert frame_no == 1
 
+    ret, frame, frame_no = images.read()
+
+    assert ret == True
+    assert frame_no == 2
+
 def test_reset(images):
 
     images.reset()
