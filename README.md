@@ -4,30 +4,30 @@ Automated analysis of zebrafish behaviours is a image processing framework to au
 
 We use DeepLabCut to create the model and Nvidia's TensorRT framework for inference.
 
-# Installation
+## Installation
 
 Install the nacessary requirements using the methods below
 
-## Option 1 :
+### Option 1 :
 Install the nacessary requirements using pip - we highly suggest creating virtual environment
 `python3 -m venv Automated-Analysis-Zebrafish-Behaviours`
 `source activate Automated-Analysis-Zebrafish-Behaviours/bin/activate`
 `pip install -r requirements.txt`
 
-## Option 2 :
+### Option 2 :
 Load docker/singularity file 
 `singularity build Automated-Analysis-Zebrafish-Behaviours singularity_file`
 `singularity shell -B <path-to-data>,<path-to-source-code> Automated-Analysis-Zebrafish-Behaviours`
 
-## Installing 
+### Installing 
 Currently, a separate installation is not required as the source code is contained in this repo.
 
-# Usage
+## Usage
 
 An overview of the workflow is given  in the image below. Check the jupyter-notebook [demos](examples) for more detailed explanation of the workflow
 
 ![Workflow](images/Workflow.png?raw=True "Workflow")
 
-# Code Contributors
+## Code Contributors
 
 Rohit Kakodkar
