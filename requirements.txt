@@ -31,4 +31,5 @@ tables
 tensorpack
 tqdm
 wheel
-tensorflow
+tensorflow==1.13.1
+deeplabcut
