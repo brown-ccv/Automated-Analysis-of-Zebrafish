@@ -24,10 +24,10 @@ Currently, a separate installation is not required as the source code is contain
 
 # Usage
 
-An overview of the workflow is given  in the image below. Check the jupyter-notebook demo for more detailed explanation of the workflow
+An overview of the workflow is given  in the image below. Check the jupyter-notebook [demos](examples) for more detailed explanation of the workflow
 
 ![Workflow](images/Workflow.png?raw=True "Workflow")
 
-# Contributers
+# Code Contributors
 
 Rohit Kakodkar
