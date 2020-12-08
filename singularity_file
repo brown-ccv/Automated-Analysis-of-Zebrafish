@@ -1,35 +1,9 @@
-Bootstrap:docker 
-From:python:3
-
-%post
-	pip install imageio
-	pip install imageio-ffmpeg
-
-
 Bootstrap: docker
-From: bethgelab/deeplearning:cuda9.0-cudnn7
+From: datamachines/cudnn_tensorflow_opencv:10.2_1.15.3_3.4.11-20200803
 
 %post
-	add-apt-repository ppa:deadsnakes/ppa
-	add-apt-repository --remove ppa:jonathonf/python-3.6
-	apt-get update
-	apt-get -y install ffmpeg
-	apt-get -y install nano
-	apt-get clean
-	apt-get autoclean
-
-	pip3 install tensorflow-gpu==1.8
-	pip3 install --upgrade pip 
-	pip3 install ruamel_yaml
-	pip3 install deeplabcut
-	pip3 install ipywidgets
-	pip3 install seaborn
+    pip install deeplabcut
+    pip install wxpython
 
 %help
-Running deeplabcut model training - 
-	contains: - Base DLC image as provided by fcatus/deeplabcut:latest
-		  - Jupyter-notebook
-		  - pyyaml
-		  - cv2
-		  - matplotlib
-		  - pandas	
+	Singularity container for running deeplabcut. You need to be on a cuda enabled machine
