@@ -90,6 +90,8 @@ class analysis:
         for circle in wells:
             ax.add_artist(plt.Circle((circle[0], circle[1]), circle[2]))
 
+        plt.show()
+
 
     def crop_to_video(self, wells, crop_dir = None, no_wells_to_record = 6):
         '''
