@@ -45,6 +45,7 @@ class Data:
         if plot:
             fig, ax = plt.subplots(figsize = (12, 12))
             ax.imshow(frame)
+            plt.show()
 
         frame_no = int(self.__iterator.get(cv2.CAP_PROP_POS_FRAMES))
 
@@ -57,7 +58,7 @@ class Data:
             output :
                 shape: shape of the images
         '''
-        ret, frame, _ = self.__iterator.read()
+        ret, frame, _ = self.read()
         # if frame is read correctly ret is True
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
