@@ -8,6 +8,8 @@ import yaml
 from time import sleep
 import deeplabcut
 import errno
+from deeplabcut.utils.auxiliaryfunctions import edit_config, read_config, GetEvaluationFolder
+import matplotlib.pyplot as plt
 
 def yaml_exists(image_folder):
     '''
@@ -158,6 +160,13 @@ if __name__ == '__main__':
         f.write(yaml.dump(cfg))
         f.close()
 
+    edits = ({  'bodyparts' : bodyparts,
+                'numframes2pick':int(total_number_of_frames/len(filenames)),
+                'skeleton':[],
+                'dotsize': 2})
+
+    edit_config(DLC_config, edits)
+
     print("Done")
     
     deeplabcut.extract_frames(DLC_config, mode = 'automatic', algo = 'kmeans', userfeedback = False)
@@ -192,30 +201,36 @@ if __name__ == '__main__':
 
     print("Done")
     
-    posefile, _, _ = deeplabcut.return_train_network_path(DLC_config)
-    edits = {"save_iters": 15000, "display_iters": 1000}
+    trainFraction=read_config(DLC_config)['TrainingFraction'][0]
+    posefile, _, _ = deeplabcut.return_train_network_path(DLC_config, shuffle=1, trainFraction=trainFraction)
+    edits = {"save_iters": 5000, "display_iters": 1000}
     _ = deeplabcut.auxiliaryfunctions.edit_config(posefile, edits)
 
     maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model. should be greater than 15000"))
 
     while True:
         
-        deeplabcut.train_network(DLC_config, max_snapshots_to_keep=3)
+        deeplabcut.train_network(DLC_config, max_snapshots_to_keep=3, maxiters = maxiters)
         
         print("Evaluating ...")
-        deeplabcut.evaluate_network(DLC_config, plotting = True)
+        deeplabcut.evaluate_network(DLC_config)
 
         print("Done")
 
+        print("Cropping another video for analysis ...")
+        filenames = experiment.crop_to_video(wells, crop_dir=cropped_dir, no_wells_to_record = 1)
+        deeplabcut.analyze_videos(DLC_config, filenames, save_as_csv=True)
+        deeplabcut.create_labeled_video(DLC_config, filenames, save_frames=True)
+
         print("Please check if the model is good enough using evaluation results.")
-        to_continue = (input("Is the model good enough? (yes/no)") == "yes")
+        to_continue = (input("Is the model good enough? (yes/no)") == "no")
+
         if to_continue:
-            print("Cropping another video for analysis ...")
-            filenames = experiment.crop_to_video(wells, cropped_dir=cropped_dir, no_wells_to_record = 6)
             deeplabcut.extract_outlier_frames(DLC_config, filenames)
             deeplabcut.refine_labels(DLC_config)
             deeplabcut.merge_datasets(DLC_config)
             deeplabcut.create_training_dataset(DLC_config, augmenter_type = 'imgaug')
+            maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model. should be greater than 15000"))
         else :
             break
 
@@ -225,8 +240,8 @@ if __name__ == '__main__':
     print("Storing the model ...")
     deeplabcut.export_model(DLC_config)
 
-    cfg = auxiliaryfunctions.read_config(cfg_path)
-    project_path = os.path.dirname(os.path.realpath(cfg_path))
+    cfg = read_config(DLC_config)
+    project_path = os.path.dirname(os.path.realpath(DLC_config))
     print("Your model is stored in {}".format(project_path + "/" + "exported-models"))
 
     print("Done")
