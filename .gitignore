@@ -9,3 +9,5 @@ DLC_integration
 model_serving
 data
 *.simg
+examples/jupyter-notebook.sh
+*.txt
