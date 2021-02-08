@@ -11,3 +11,5 @@ data
 *.simg
 examples/jupyter-notebook.sh
 *.txt
+examples/inference_run.sh
+examples/Inference_book.ipynb
