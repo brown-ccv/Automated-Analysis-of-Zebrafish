@@ -63,7 +63,7 @@ if __name__ =='__main__':
 
     predictions = infer.predict(wells = wells)
 
-    print("Writing results to " + results_file, flush = True)
+    print("Anlysing and writing results to " + results_file, flush = True)
 
     observations = analyze_df(predictions)
     observations.to_csv(results_file)
