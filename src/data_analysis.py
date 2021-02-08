@@ -17,10 +17,12 @@ def get_well_no(row, xd, yd):
     
     return ((xmod+1) + ymod*xd + x * xd * yd + y * xd * yd * 2)
 
-def analyze_df(predictions):
+def analyze_df(predictions, wells):
 
     observations = predictions.drop(['right_eye_y', 'right_eye_x', 'left_eye_y', 'left_eye_x'],
                                 axis = 1)
+
+    radius = wells['radius'].mean()
     observations['Label'] = np.nan
     observations['Xmid'] = wells['radius'].mean()
     observations['Ymid'] = wells['radius'].mean()
