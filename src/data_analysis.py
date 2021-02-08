@@ -8,22 +8,16 @@ def up_or_down(row):
     else:
         return 0
     
-def get_well_no(row):
-    
-    xd = 
+def get_well_no(row, xd, yd):
 
-    xmod = row['Xcor'] % 12
-    ymod = row['Ycor'] % 8
-    x = row['Xcor'] // 12
-    y = row['Ycor'] // 8
+    xmod = row['Xcor'] % xd
+    ymod = row['Ycor'] % yd
+    x = row['Xcor'] // xd
+    y = row['Ycor'] // yd
     
-    return ((xmod+1) + ymod*12 + x * 12 * 8 + y * 12 * 8 * 2)
+    return ((xmod+1) + ymod*xd + x * xd * yd + y * xd * yd * 2)
 
-def get_period(row):
-    
-    return row['Image']//100 + 1
-
-def analyze_df(predictions, wells):
+def analyze_df(predictions):
 
     observations = predictions.drop(['right_eye_y', 'right_eye_x', 'left_eye_y', 'left_eye_x'],
                                 axis = 1)
@@ -33,16 +27,18 @@ def analyze_df(predictions, wells):
     observations.rename(columns = {'yolk_y':'Y', 'yolk_x':'X'}, inplace = True)
     observations['Image'] = observations.index.get_level_values(0)
     observations['Xcor'] = observations.index.get_level_values(1)
+    xd = len(observations['Xcor'].unique())
     observations['Ycor'] = observations.index.get_level_values(2)
+    yd = len(observations['Ycor'].unique())
     observations['MinThr'] = np.nan
     observations['MaxThr'] = np.nan
     observations['Area'] = np.nan
     observations['Up'] = observations.apply(lambda row: up_or_down(row), axis = 1)
-    observations['Well'] = observations.apply(lambda row: get_well_no(row), axis = 1)
-    observations['Move'] = (np.sqrt((observations['X'] - observations['X'].shift(len(wells) + 1))**2 + 
-                                    (observations['Y'] - observations['Y'].shift(len(wells) + 1))**2) > 76/4)
+    observations['Well'] = observations.apply(lambda row: get_well_no(row, xd, yd), axis = 1)
+    observations['Move'] = (np.sqrt((observations['X'] - observations['X'].shift(xd * yd + 1))**2 + 
+                                    (observations['Y'] - observations['Y'].shift(xd * yd + 1))**2) > 76/4)
     observations['Exp'] = np.nan
-    observations['Period'] = observations.apply(lambda row: get_period(row), axis = 1)
+    observations['Period'] = observations['Image'] // 100 + 1
     observations.sort_values(['Image', 'Well'], inplace = True)
     observations.reset_index(drop=True, inplace=True)
 
