@@ -1,6 +1,9 @@
-import tensorflow as tf
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
+
+import tensorflow.compat.v1 as tf
 from read_data import Data
-from analysis import analysis
+from video_analysis import analysis
 import pandas as pd
 import numpy as np
 
@@ -27,15 +30,14 @@ class predict:
 
             well_ind, data = self.__analysis.crop_wells(wells, image)
             predictions = sess.run(output, feed_dict = {input : data})
+            
+            predictions = np.asarray(predictions)[:,:2].reshape(len(wells), 6)
 
-            predictions = np.asarray(predictions).reshape(3, len(wells), 3)
-            predictions = (predictions.view([(f'f{i}',predictions.dtype)
-                                            for i in range(predictions.shape[-1])])[...,0].astype('O'))
-
-            predicted_image = pd.DataFrame( predictions.transpose(), 
-                                            columns = ['right_eye', 'left_eye', 'yolk'],
-                                            index = pd.MultiIndex.from_tuples(well_ind))
-
+            predicted_image = pd.DataFrame(predictions, columns = ['right_eye_y', 'right_eye_x',
+                                                                    'left_eye_y', 'left_eye_x',
+                                                                    'yolk_y', 'yolk_x'], 
+                                        index = pd.MultiIndex.from_tuples(well_ind))
+    
             return predicted_image
 
         if (image):
@@ -49,9 +51,14 @@ class predict:
 
         sess, output, input = self.get_session()
         predictions = []
+        frames = []
 
-        while (True):
+        total_frames = self.__data.get_total_frames()
+
+        for i in range(total_frames):
             ret, image, img_no = self.__data.read()
+
+            frames.append(img_no)
 
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
@@ -60,7 +67,11 @@ class predict:
             predicted_image = predict_image(image, wells, sess, input, output)
             predictions.append(predicted_image)
 
-        predictions = pd.concat(predictions, keys = [i + 1 for i in range(self.__data.get_total_frames())])
+            if (i%10) == 0:
+                print ("Analyzed {}/{} images".format(i, total_frames), flush = True)
+
+        predictions = pd.concat(predictions, keys = frames)
+        predictions.rename_axis(['frame', 'X-coord', 'Y-coord'], inplace = True)
 
         sess.close()
         return predictions
