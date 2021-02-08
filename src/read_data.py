@@ -49,7 +49,7 @@ class Data:
 
         frame_no = int(self.__iterator.get(cv2.CAP_PROP_POS_FRAMES))
 
-        return ret, frame, frame_no+1
+        return ret, frame, frame_no
 
     def get_shape(self):
         '''
