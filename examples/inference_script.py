@@ -65,7 +65,7 @@ if __name__ =='__main__':
 
     print("Anlysing and writing results to " + results_file, flush = True)
 
-    observations = analyze_df(predictions)
+    observations = analyze_df(predictions, wells)
     observations.to_csv(results_file)
 
     print("Done", flush = True)
