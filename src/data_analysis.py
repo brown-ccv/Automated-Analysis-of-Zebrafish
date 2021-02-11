@@ -15,10 +15,11 @@ def get_well_no(row, xd, yd):
     x = row['Xcor'] // xd
     y = row['Ycor'] // yd
     
-    return ((xmod+1) + ymod*xd + x * xd * yd + y * xd * yd * 2)
+    return ((xmod+1) + ymod*xd + y * xd * yd + x * xd * yd * 2)
 
 def analyze_df(predictions, wells):
 
+    xd, yd = 12, 8
     observations = predictions.drop(['right_eye_y', 'right_eye_x', 'left_eye_y', 'left_eye_x'],
                                 axis = 1)
 
@@ -29,9 +30,7 @@ def analyze_df(predictions, wells):
     observations.rename(columns = {'yolk_y':'Y', 'yolk_x':'X'}, inplace = True)
     observations['Image'] = observations.index.get_level_values(0)
     observations['Xcor'] = observations.index.get_level_values(1)
-    xd = len(observations['Xcor'].unique())
     observations['Ycor'] = observations.index.get_level_values(2)
-    yd = len(observations['Ycor'].unique())
     observations['MinThr'] = np.nan
     observations['MaxThr'] = np.nan
     observations['Area'] = np.nan
