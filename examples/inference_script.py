@@ -59,7 +59,7 @@ if __name__ =='__main__':
 
     wells = experiment.detect_wells(R = [rmin, rmax])
 
-    print("Total number of wells detected = {}".format(len(wells)))
+    print("Total number of wells detected = {}".format(len(wells)), flush = True)
 
     print("Running predictions. This will take a while!", flush = True)
 
