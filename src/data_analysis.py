@@ -3,7 +3,7 @@ import numpy as np
 
 def up_or_down(row):
     
-    if row['Y'] > row['Ymid']:
+    if row['Y'] < row['Ymid']:
         return 100
     else:
         return 0
