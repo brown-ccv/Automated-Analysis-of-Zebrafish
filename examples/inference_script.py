@@ -59,6 +59,8 @@ if __name__ =='__main__':
 
     wells = experiment.detect_wells(R = [rmin, rmax])
 
+    print("Total number of wells detected = {}".format(len(wells)))
+
     print("Running predictions. This will take a while!", flush = True)
 
     predictions = infer.predict(wells = wells)
