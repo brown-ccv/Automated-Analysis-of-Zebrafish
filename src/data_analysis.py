@@ -44,8 +44,8 @@ def analyze_df(predictions, wells):
                                     (observations['Y'] - observations['Y'].shift(xd * yd + 1))**2)
     observations['Orientation'] = (((predictions['right_eye_y'] - observations['Ymid'])**2 + (predictions['right_eye_x'] - observations['Xmid'])**2) < 
                                     ((predictions['left_eye_y'] - observations['Ymid'])**2 + (predictions['left_eye_x'] - observations['Xmid'])**2))
-    
+    observations['Distance from center'] = np.sqrt((observations['Y'] - observations['Ymid'])**2 + (observations['X'] - observations['Xmid'])**2)
     observations.sort_values(['Image', 'Well'], inplace = True)
     observations.reset_index(drop=True, inplace=True)
 
-    return observations[['Label', 'Area', 'X', 'Y', 'MinThr', 'MaxThr', 'Image', 'Period', 'Well', 'Xmid', 'Ymid', 'Exp', 'Move', 'Up', 'Distance', 'Orientation']]
+    return observations[['Label', 'Area', 'X', 'Y', 'MinThr', 'MaxThr', 'Image', 'Period', 'Well', 'Xmid', 'Ymid', 'Exp', 'Move', 'Up', 'Distance', 'Orientation', 'Distance from center']]
