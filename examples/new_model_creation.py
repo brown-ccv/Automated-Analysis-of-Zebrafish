@@ -1,9 +1,10 @@
 import sys
 import os
-sys.path.append('../src')
+import pathlib
+sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '../src'))
 
 from read_data import Data
-from analysis import analysis
+from video_analysis import analysis
 import yaml
 from time import sleep
 import deeplabcut
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     print("Detecting wells ...")
 
     if first_time:
-        rmin, rmax = map(int, input("Input estimated minimum and maximum radius of wells. If you want to continue with defaults type 72 100").split())
+        rmin, rmax = map(int, input("Input estimated minimum and maximum radius of wells. If you want to continue with defaults type 72 100\n").split())
     else :
         rmin = cfg['rmin']
         rmax = cfg['rmax']
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     wells_correct = (input() == "yes")
 
     while not wells_correct:
-        rmin, rmax = input("Please input different values for minimum and maximum estimated radii").split()
+        rmin, rmax = input("Please input different values for minimum and maximum estimated radii\n").split()
         wells = experiment.detect_wells(R = [rmin, rmax])
 
         print("Total of {} wells detected. A plot should open up shortly".format(len(wells)))
@@ -140,8 +141,8 @@ if __name__ == '__main__':
         if e.errno != errno.EEXIST:
             raise
 
-    project_name = input("Please input a name for your project. e.g. MyFirstModel/ My_First_Project (Note there shouldn't be any spaces in the name)")
-    experimenter = input("Please input who is conducting this analysis")
+    project_name = input("Please input a name for your project. e.g. MyFirstModel/ My_First_Project (Note there shouldn't be any spaces in the name)\n")
+    experimenter = input("Please input who is conducting this analysis\n")
 
     DLC_config = deeplabcut.create_new_project(  project_name,
                                     experimenter,
@@ -149,8 +150,8 @@ if __name__ == '__main__':
                                     working_directory = project_dir,
                                     copy_videos = False)
     
-    bodyparts = list(input("What bodyparts would you want to be detected? e.g. right_eye left_eye yolk").split())
-    total_number_of_frames = int(input("Total number of frames you would like to label. The higher this number the better the model."))
+    bodyparts = list(input("What bodyparts would you want to be detected? e.g. right_eye left_eye yolk\n").split())
+    total_number_of_frames = int(input("Total number of frames you would like to label. The higher this number the better the model.\n"))
 
     cfg['created_project'] = True
 
@@ -201,8 +202,8 @@ if __name__ == '__main__':
 
     print("Done")
     
-    trainFraction=read_config(DLC_config)['TrainingFraction'][0]
-    posefile, _, _ = deeplabcut.return_train_network_path(DLC_config, shuffle=1, trainFraction=trainFraction)
+    trainFraction=read_config(DLC_config)['TrainingFraction']
+    posefile, _, _ = deeplabcut.return_train_network_path(DLC_config)
     edits = {"save_iters": 5000, "display_iters": 1000}
     _ = deeplabcut.auxiliaryfunctions.edit_config(posefile, edits)
 
@@ -223,14 +224,14 @@ if __name__ == '__main__':
         deeplabcut.create_labeled_video(DLC_config, filenames, save_frames=True)
 
         print("Please check if the model is good enough using evaluation results.")
-        to_continue = (input("Is the model good enough? (yes/no)") == "no")
+        to_continue = (input("Is the model good enough? (yes/no)\n") == "no")
 
         if to_continue:
             deeplabcut.extract_outlier_frames(DLC_config, filenames)
             deeplabcut.refine_labels(DLC_config)
             deeplabcut.merge_datasets(DLC_config)
             deeplabcut.create_training_dataset(DLC_config, augmenter_type = 'imgaug')
-            maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model. should be greater than 15000"))
+            maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model. should be greater than 15000\n"))
         else :
             break
 
