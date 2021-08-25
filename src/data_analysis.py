@@ -49,4 +49,6 @@ def analyze_df(observations, wells):
     observations.sort_values(['Image', 'Well'], inplace = True)
     observations.reset_index(drop=True, inplace=True)
 
-    return observations[['Label', 'Area', 'X', 'Y', 'MinThr', 'MaxThr', 'Image', 'Period', 'Well', 'Xmid', 'Ymid', 'Exp', 'Move', 'Up', 'Speed', 'CW', 'Edge', 'XLE', 'YLE', 'XRE', 'YRE']]
+    return (observations[['Label', 'Area', 'X', 'Y', 'MinThr', 'MaxThr', 'Image', 'Period', 
+                          'Well', 'Xmid', 'Ymid', 'Exp', 'Move', 'Up', 'Speed', 'CW', 'Edge', 
+                          'XLE', 'YLE', 'XRE', 'YRE', 'prob_LE', 'prob_RE', 'prob_Y']])
