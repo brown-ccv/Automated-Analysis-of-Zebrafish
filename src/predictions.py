@@ -31,11 +31,11 @@ class predict:
             well_ind, data = self.__analysis.crop_wells(wells, image)
             predictions = sess.run(output, feed_dict = {input : data})
             
-            predictions = np.asarray(predictions)[:,:2].reshape(len(wells), 6)
-
-            predicted_image = pd.DataFrame(predictions, columns = ['right_eye_y', 'right_eye_x',
-                                                                    'left_eye_y', 'left_eye_x',
-                                                                    'yolk_y', 'yolk_x'], 
+            predictions = np.asarray(predictions).reshape(len(wells), 9)
+            
+            predicted_image = pd.DataFrame(predictions, columns = ['right_eye_y', 'right_eye_x', 'prob_RE',
+                                                                    'left_eye_y', 'left_eye_x', 'prob_LE',
+                                                                    'yolk_y', 'yolk_x', 'prob_Y'],
                                         index = pd.MultiIndex.from_tuples(well_ind))
     
             return predicted_image
