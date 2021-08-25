@@ -13,3 +13,6 @@ examples/jupyter-notebook.sh
 *.txt
 examples/inference_run.sh
 examples/Inference_book.ipynb
+examples/Comparison.ipynb
+examples/Analysis_book.ipynb
+examples/probability_vs_area.ipynb
