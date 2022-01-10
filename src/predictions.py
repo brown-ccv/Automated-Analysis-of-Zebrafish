@@ -25,6 +25,11 @@ class predict:
         self.__graph = load_graph(model_path)
 
     def predict(self, wells, image = None):
+        from scipy import stats
+
+        def get_area(x,y):
+            area=0.5*( (x[0]*(y[1]-y[2])) + (x[1]*(y[2]-y[0])) + (x[2]*(y[0]-y[1])) )
+            return np.abs(area)
 
         def predict_image(image, wells, sess, input, output):
 
@@ -74,6 +79,27 @@ class predict:
         predictions.rename_axis(['frame', 'X-coord', 'Y-coord'], inplace = True)
 
         sess.close()
+
+        predictions['area'] = predictions.apply(lambda row: get_area([row['left_eye_x'],
+                                                              row['right_eye_x'],
+                                                              row['yolk_x']], 
+                                                             [row['left_eye_y'],
+                                                              row['right_eye_y'],
+                                                              row['yolk_y']]), axis = 1)
+
+        indices = predictions.loc[1, :, :].index.tolist()
+
+        for _, idx, idy in indices:
+            
+            areas = ([predictions.loc[:, idx, idy]['area'].median(),
+                                stats.median_abs_deviation(predictions.loc[:, idx, idy]['area'].tolist())])
+            upper_bound = areas[0] + np.Inf
+            lower_bound = areas[0] - np.Inf
+            cond = (predictions.loc[:, idx, idy]['area'] < lower_bound) | (predictions.loc[:, idx, idy]['area'] > upper_bound)
+            cond = np.tile(cond, [predictions.loc[:, idx, idy].shape[1], 1]).transpose()
+
+            predictions.loc[:, idx, idy] = predictions.loc[:, idx, idy].mask(cond).values
+
         return predictions
 
 
