@@ -16,3 +16,8 @@ examples/Inference_book.ipynb
 examples/Comparison.ipynb
 examples/Analysis_book.ipynb
 examples/probability_vs_area.ipynb
+examples/*.jpg
+*.png
+*.jpg
+examples/validation_notebook.ipynb
+model_zoo/96_well_plate-13-10-2021-Rohit.pb
