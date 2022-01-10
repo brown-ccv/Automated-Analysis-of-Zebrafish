@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
         print("Cropping wells. This might take a while ....")
 
-        filenames = experiment.crop_to_video(wells, crop_dir=cropped_dir, no_wells_to_record = 6)
+        filenames = experiment.crop_to_video(wells, crop_dir=cropped_dir, no_wells_to_record = 18)
 
         print("Done")
     else :
@@ -165,6 +165,8 @@ if __name__ == '__main__':
                 'numframes2pick':int(total_number_of_frames/len(filenames)),
                 'skeleton':[],
                 'dotsize': 2})
+
+    print(DLC_config)
 
     edit_config(DLC_config, edits)
 
