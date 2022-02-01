@@ -1,11 +1,11 @@
 services:
     training:
-      image: ${REGISTRY}/${IMAGE_NAME}/training:${TAG}
+      image: ${REGISTRY}/${IMAGE_NAME}-training:${TAG}
       build:
           context: .
           dockerfile: ./docker/Dockerfile.training
     inference:
-      image: ${REGISTRY}/${IMAGE_NAME}/inference:${TAG}
+      image: ${REGISTRY}/${IMAGE_NAME}-inference:${TAG}
       build:
           context: .
           dockerfile: ./docker/Dockerfile.inference
