@@ -39,8 +39,7 @@ jobs:
 
       - name: Build and Push Image
         env:
-          VERSION_TAG: ${{ steps.tag.outputs.tags }}
-          MAIN_TAG: ${{ steps.extract_branch.outputs.branch }}
+          TAG: ${{ steps.tag.outputs.tags }}
         run: |
           docker-compose build
           docker-compose push
