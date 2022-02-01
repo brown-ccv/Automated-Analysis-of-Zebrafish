@@ -3,7 +3,7 @@ on: [push]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: rkakodka/automated-analysis-of-zebrafish
+  IMAGE_NAME: rkakodkar/automated-analysis-of-zebrafish
 
 jobs:
   build_and_push:
