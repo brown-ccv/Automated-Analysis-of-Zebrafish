@@ -1,6 +1,6 @@
 FROM deeplabcut/deeplabcut:latest-gui-jupyter
 
-COPY ["./src", "./examples", "./docker/requirements.training", "./"]
+COPY ["./src", "./examples", "./docker/requirements.inference", "./"]
 
 RUN pip install -r requirements.training
 
