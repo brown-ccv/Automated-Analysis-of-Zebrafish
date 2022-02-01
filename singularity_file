@@ -1,9 +1,0 @@
-Bootstrap: docker
-From: datamachines/cudnn_tensorflow_opencv:10.2_1.15.3_3.4.11-20200803
-
-%post
-    pip install deeplabcut
-    pip install -U wxpython==4.0.7.post2
-
-%help
-	Singularity container for running deeplabcut. You need to be on a cuda enabled machine
