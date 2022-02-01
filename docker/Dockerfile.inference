@@ -1,0 +1,8 @@
+FROM nvcr.io/nvidia/tensorflow:21.12-tf1-py3
+
+COPY ["./src", "./examples", "./docker/requirements.training", "./"]
+
+RUN pip install -r requirements.inference
+ENV PYTHONPATH "${PYTHONPATH}:./src"
+
+ENTRYPOINT ["/bin/bash"]

@@ -1,0 +1,9 @@
+FROM deeplabcut/deeplabcut:latest-gui-jupyter
+
+COPY ["./src", "./examples", "./docker/requirements.training", "./"]
+
+RUN pip install -r requirements.training
+
+ENV PYTHONPATH "${PYTHONPATH}:./src"
+
+ENTRYPOINT ["/bin/bash"]
