@@ -1,7 +1,9 @@
-import numpy as np
+import glob
+
 import cv2
 import matplotlib.pyplot as plt
-import glob
+import numpy as np
+
 
 class Data:
 

@@ -1,16 +1,18 @@
-import sys
 import os
 import pathlib
-sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '../src'))
+import sys
 
-from read_data import Data
-from video_analysis import analysis
-from predictions import predict
+import argparse
 from time import sleep
+
 import numpy as np
 import pandas as pd
-import argparse
+
 from data_analysis import analyze_df
+from predictions import predict
+from read_data import Data
+from video_analysis import analysis
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()

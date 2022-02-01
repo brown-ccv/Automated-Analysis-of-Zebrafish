@@ -1,11 +1,14 @@
-import pytest
 import os
 import sys
+
+import pytest
+
 sys.path.append(os.path.join(os.getcwd(), '../src'))
 
-import read_data
-import pandas as pd
 import analysis
+import pandas as pd
+
+import read_data
 
 images = read_data('example_images/96_well_plates/IMG_000%1d.JPG')
 experiment = analysis(images)

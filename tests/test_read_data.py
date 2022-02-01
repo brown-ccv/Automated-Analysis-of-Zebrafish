@@ -1,6 +1,8 @@
-import pytest
 import os
 import sys
+
+import pytest
+
 sys.path.append(os.path.join(os.getcwd(), '../src'))
 
 import read_data

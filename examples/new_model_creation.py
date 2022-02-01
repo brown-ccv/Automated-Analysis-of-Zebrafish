@@ -1,16 +1,19 @@
-import sys
 import os
 import pathlib
-sys.path.append(os.path.join(pathlib.Path(__file__).parent.absolute(), '../src'))
+import sys
+
+import errno
+from time import sleep
+
+import deeplabcut
+import matplotlib.pyplot as plt
+import yaml
+from deeplabcut.utils.auxiliaryfunctions import (GetEvaluationFolder,
+                                                 edit_config, read_config)
 
 from read_data import Data
 from video_analysis import analysis
-import yaml
-from time import sleep
-import deeplabcut
-import errno
-from deeplabcut.utils.auxiliaryfunctions import edit_config, read_config, GetEvaluationFolder
-import matplotlib.pyplot as plt
+
 
 def yaml_exists(image_folder):
     '''

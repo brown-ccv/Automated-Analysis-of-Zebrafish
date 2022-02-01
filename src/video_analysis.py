@@ -1,11 +1,14 @@
-from read_data import Data
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-import os
 import errno
-import pandas as pd
+import os
 import random
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from read_data import Data
+
 
 class analysis:
 
