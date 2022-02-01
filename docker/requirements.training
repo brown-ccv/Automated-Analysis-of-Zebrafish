@@ -1,0 +1,8 @@
+matplotlib
+numpy==1.16.4
+opencv-python
+pandas>=1.0.1
+pyyaml
+scikit-image
+scikit-learn
+scipy>=1.4

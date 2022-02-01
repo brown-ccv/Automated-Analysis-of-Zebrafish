@@ -8,3 +8,15 @@ exported_models
 DLC_integration
 model_serving
 data
+*.simg
+examples/jupyter-notebook.sh
+*.txt
+examples/inference_run.sh
+examples/Inference_book.ipynb
+examples/Comparison.ipynb
+examples/Analysis_book.ipynb
+examples/probability_vs_area.ipynb
+examples/*.jpg
+*.png
+*.jpg
+examples/validation_notebook.ipynb

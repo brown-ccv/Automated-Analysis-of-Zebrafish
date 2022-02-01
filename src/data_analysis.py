@@ -1,0 +1,98 @@
+import numpy as np
+import pandas as pd
+
+
+def move_threshhold(distance, lower_bound, upper_bound):
+    
+    if distance != distance:
+        return np.nan
+    
+    if (distance > lower_bound) and (distance < upper_bound):
+        return 100
+    else:
+        return 0
+
+def up_or_down(row):
+    
+    if row['Y'] != row['Y']:
+        return np.nan
+    
+    if row['Y'] < row['Ymid']:
+        return 100
+    else:
+        return 0
+    
+def get_well_no(row, xd, yd):
+
+    xmod = row['Xcor'] % xd
+    ymod = row['Ycor'] % yd
+    x = row['Xcor'] // xd
+    y = row['Ycor'] // yd
+    
+    return ((xmod+1) + ymod*xd + y * xd * yd + x * xd * yd * 2)
+
+def get_midpoint(p1, p2):
+    return (p1+p2)/2
+
+def get_orientation(RE, LE, Y):
+    
+    midpt = get_midpoint(RE, LE)
+    diff = midpt - Y
+    return np.arctan2(diff[1], diff[0])*180/np.pi
+
+def get_change_in_orientation(value):
+    
+    if value < -180:
+        return value + 360
+    elif value > 180:
+        return value - 360
+    else:
+        return value
+
+def analyze_df(observations, wells):
+
+    xd, yd = 12, 8
+
+    radius = wells['radius'].mean()
+    observations['Label'] = np.nan
+    observations['Xmid'] = wells['radius'].mean()
+    observations['Ymid'] = wells['radius'].mean()
+    observations.rename(columns = {'yolk_y':'Y', 'yolk_x':'X'}, inplace = True)
+    observations.rename(columns = {'right_eye_y' : 'YRE', 'right_eye_x': 'XRE', 'left_eye_y': 'YLE', 'left_eye_x': 'XLE'}, inplace = True)
+    observations['Image'] = observations.index.get_level_values(0)
+    observations['Xcor'] = observations.index.get_level_values(1)
+    observations['Ycor'] = observations.index.get_level_values(2)
+    observations['MinThr'] = np.nan
+    observations['MaxThr'] = np.nan
+    observations['Area'] = np.nan
+    observations['Up'] = observations.apply(lambda row: up_or_down(row), axis = 1)
+    observations['Well'] = observations.apply(lambda row: get_well_no(row, xd, yd), axis = 1)
+    observations['Exp'] = np.nan
+    observations['Period'] = observations['Image'] // 100 + 1
+    observations['Speed'] = np.sqrt((observations['X'] - observations['X'].shift(len(wells)))**2 + 
+                                    (observations['Y'] - observations['Y'].shift(len(wells)))**2)
+    observations['Move'] = observations.apply(lambda row: move_threshhold(row['Speed'], 3, np.Inf), axis = 1)
+    observations['Scoot'] = observations.apply(lambda row: move_threshhold(row['Speed'], 3, 20), axis = 1)
+    observations['Burst'] = observations.apply(lambda row: move_threshhold(row['Speed'], 20, np.Inf), axis = 1)
+    observations['CW'] = (((observations['YRE'] - observations['Ymid'])**2 + (observations['XRE'] - observations['Xmid'])**2) < 
+                                    ((observations['YLE'] - observations['Ymid'])**2 + (observations['XLE'] - observations['Xmid'])**2))
+    observations['CW'] = observations['CW'].astype(int) * 100
+    observations['Orientation'] = observations.apply(lambda row: get_orientation(
+                                                                    RE = np.array([row['XRE'], row['YRE']]),
+                                                                    LE = np.array([row['XLE'], row['YLE']]),
+                                                                    Y = np.array([row['X'], row['Y']])),
+                                                                axis = 1)
+    observations['Absolute change in orientation'] = (observations['Orientation'] - 
+                                                      observations['Orientation'].shift(len(wells)))
+    observations['Change in orientation'] = observations.apply(lambda row: get_change_in_orientation(row['Absolute change in orientation']), 
+                                                               axis = 1)
+    observations['Edge'] = np.sqrt((observations['Y'] - observations['Ymid'])**2 + (observations['X'] - observations['Xmid'])**2)
+    observations['p_Edge'] = observations['Edge'] > 50
+    observations['p_Edge'] = observations['p_Edge'].astype(int)*100
+    observations.sort_values(['Image', 'Well'], inplace = True)
+    observations.reset_index(drop=True, inplace=True)
+
+    return (observations[['Label', 'Area', 'X', 'Y', 'MinThr', 'MaxThr', 'Image', 'Period', 
+                          'Well', 'Xmid', 'Ymid', 'Exp', 'Move', 'Up', 'Speed', 'CW', 'Change in orientation','Edge',
+                          'Scoot', 'Burst', 'XLE', 'YLE', 'XRE', 'YRE', 'prob_LE', 'prob_RE', 
+                          'prob_Y', 'p_Edge']])

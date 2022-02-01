@@ -1,19 +1,26 @@
-import sys
 import os
-sys.path.append('../src')
+import pathlib
+import sys
+
+import errno
+from time import sleep
+
+import deeplabcut
+import matplotlib.pyplot as plt
+import yaml
+from deeplabcut.utils.auxiliaryfunctions import (GetEvaluationFolder,
+                                                 edit_config, read_config)
 
 from read_data import Data
-from analysis import analysis
-import yaml
-from time import sleep
-import deeplabcut
+from video_analysis import analysis
+
 
 def yaml_exists(image_folder):
     '''
         check if yaml exists in this folder.
     '''
 
-    if any(File == "config.yaml" for File in os.listdir("image_folder")):
+    if any(File == "config.yaml" for File in os.listdir(image_folder)):
         print( "You've preiously used this folder to create a model. Would you like to continue using the same analysis? (yes/no)")
         if (input() == "yes"):
             return True
@@ -33,7 +40,7 @@ if __name__ == '__main__':
     print("Which folder would you like to analyze?")
     print("Possible options are :")
     for item in os.listdir(os.path.join(data_dir, user)):
-        if os.path.isdir(item):
+        if os.path.isdir(os.path.join(data_dir, user, item)):
             print(item)
 
     experiment_dir = input()
@@ -41,10 +48,6 @@ if __name__ == '__main__':
     image_folder = os.path.join(data_dir, user, experiment_dir)
     first_time = not yaml_exists(image_folder)
     config_file = os.path.join(image_folder, "config.yaml")
-
-    if first_time:
-        cfg = yaml.load(config_file)
-        image_folder = cfg['image_folder']
 
     print("Loading images ...")
 
@@ -69,10 +72,12 @@ if __name__ == '__main__':
         print("Closing this session")
         sys.exit()
 
+    experiment = analysis(images)
+
     print("Detecting wells ...")
 
     if first_time:
-        rmin, rmax = map(int, input("Input estimated minimum and maximum radius of wells. If you want to continue with defaults type 72 100").split())
+        rmin, rmax = map(int, input("Input estimated minimum and maximum radius of wells. If you want to continue with defaults type 72 100\n").split())
     else :
         rmin = cfg['rmin']
         rmax = cfg['rmax']
@@ -87,7 +92,7 @@ if __name__ == '__main__':
     wells_correct = (input() == "yes")
 
     while not wells_correct:
-        rmin, rmax = input("Please input different values for minimum and maximum estimated radii").split()
+        rmin, rmax = input("Please input different values for minimum and maximum estimated radii\n").split()
         wells = experiment.detect_wells(R = [rmin, rmax])
 
         print("Total of {} wells detected. A plot should open up shortly".format(len(wells)))
@@ -108,7 +113,7 @@ if __name__ == '__main__':
 
         print("Cropping wells. This might take a while ....")
 
-        filenames = experiment.crop_to_video(wells, cropped_dir=cropped_dir, no_wells_to_record = 6)
+        filenames = experiment.crop_to_video(wells, crop_dir=cropped_dir, no_wells_to_record = 18)
 
         print("Done")
     else :
@@ -118,15 +123,15 @@ if __name__ == '__main__':
 
     print("Storing progress in config.yaml ...")
 
-    cfg = [{    'image_folder': image_folder,
+    cfg = {    'image_folder': image_folder,
                 'rmin': rmin,
                 'rmax': rmax,
                 'cropped_dir': cropped_dir,
-                'filenames': filenames     }]
+                'filenames': filenames     }
 
 
-    with (open(config_file, "r+") as f):
-        f.write(yaml.dumps(cfg))
+    with open(config_file, "w+") as f:
+        f.write(yaml.dump(cfg))
         f.close()
 
     print("Done")
@@ -139,8 +144,8 @@ if __name__ == '__main__':
         if e.errno != errno.EEXIST:
             raise
 
-    project_name = input("Please input a name for your project. e.g. MyFirstModel/ My_First_Project (Note there shouldn't be any spaces in the name)")
-    experimenter = input("Please input who is conducting this analysis")
+    project_name = input("Please input a name for your project. e.g. MyFirstModel/ My_First_Project (Note there shouldn't be any spaces in the name)\n")
+    experimenter = input("Please input who is conducting this analysis\n")
 
     DLC_config = deeplabcut.create_new_project(  project_name,
                                     experimenter,
@@ -148,16 +153,25 @@ if __name__ == '__main__':
                                     working_directory = project_dir,
                                     copy_videos = False)
     
-    bodyparts = list(input("What bodyparts would you want to be detected? e.g. right_eye left_eye yolk").split())
-    total_number_of_frames = int(input("Total number of frames you would like to label. The higher this number the better the model."))
+    bodyparts = list(input("What bodyparts would you want to be detected? e.g. right_eye left_eye yolk\n").split())
+    total_number_of_frames = int(input("Total number of frames you would like to label. The higher this number the better the model.\n"))
 
     cfg['created_project'] = True
 
     print("Storing progress in config.yaml ...")
 
-    with (open(config_file, "r+") as f):
-        f.write(yaml.dumps(cfg))
+    with open(config_file, "w+") as f:
+        f.write(yaml.dump(cfg))
         f.close()
+
+    edits = ({  'bodyparts' : bodyparts,
+                'numframes2pick':int(total_number_of_frames/len(filenames)),
+                'skeleton':[],
+                'dotsize': 2})
+
+    print(DLC_config)
+
+    edit_config(DLC_config, edits)
 
     print("Done")
     
@@ -166,8 +180,8 @@ if __name__ == '__main__':
 
     print("Storing progress in config.yaml ...")
 
-    with (open(config_file, "r+") as f):
-        f.write(yaml.dumps(cfg))
+    with open(config_file, "w+") as f:
+        f.write(yaml.dump(cfg))
         f.close()
 
     print("Done")
@@ -176,8 +190,8 @@ if __name__ == '__main__':
     cfg['labeled_frames'] = True
     print("Storing progress in config.yaml ...")
 
-    with (open(config_file, "r+") as f):
-        f.write(yaml.dumps(cfg))
+    with open(config_file, "w+") as f:
+        f.write(yaml.dump(cfg))
         f.close()
 
     print("Done")
@@ -187,36 +201,42 @@ if __name__ == '__main__':
 
     print("Storing progress in config.yaml ...")
 
-    with (open(config_file, "r+") as f):
-        f.write(yaml.dumps(cfg))
+    with open(config_file, "w+") as f:
+        f.write(yaml.dump(cfg))
         f.close()
 
     print("Done")
     
+    trainFraction=read_config(DLC_config)['TrainingFraction']
     posefile, _, _ = deeplabcut.return_train_network_path(DLC_config)
-    edits = {"save_iters": 15000, "display_iters": 1000}
+    edits = {"save_iters": 5000, "display_iters": 1000}
     _ = deeplabcut.auxiliaryfunctions.edit_config(posefile, edits)
 
     maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model. should be greater than 15000"))
 
     while True:
         
-        deeplabcut.train_network(DLC_config, max_snapshots_to_keep=3)
+        deeplabcut.train_network(DLC_config, max_snapshots_to_keep=3, maxiters = maxiters)
         
         print("Evaluating ...")
-        deeplabcut.evaluate_network(DLC_config, plotting = True)
+        deeplabcut.evaluate_network(DLC_config)
 
         print("Done")
 
+        print("Cropping another video for analysis ...")
+        filenames = experiment.crop_to_video(wells, crop_dir=cropped_dir, no_wells_to_record = 1)
+        deeplabcut.analyze_videos(DLC_config, filenames, save_as_csv=True)
+        deeplabcut.create_labeled_video(DLC_config, filenames, save_frames=True)
+
         print("Please check if the model is good enough using evaluation results.")
-        to_continue = (input("Is the model good enough? (yes/no)") == "yes")
-        if (to_continue)
-            print("Cropping another video for analysis ...")
-            filenames = experiment.crop_to_video(wells, cropped_dir=cropped_dir, no_wells_to_record = 6)
+        to_continue = (input("Is the model good enough? (yes/no)\n") == "no")
+
+        if to_continue:
             deeplabcut.extract_outlier_frames(DLC_config, filenames)
             deeplabcut.refine_labels(DLC_config)
             deeplabcut.merge_datasets(DLC_config)
             deeplabcut.create_training_dataset(DLC_config, augmenter_type = 'imgaug')
+            maxiters = int(input("How many iterations do you want the model to train? The larger this number the accurate the model. should be greater than 15000\n"))
         else :
             break
 
@@ -226,8 +246,8 @@ if __name__ == '__main__':
     print("Storing the model ...")
     deeplabcut.export_model(DLC_config)
 
-    cfg = auxiliaryfunctions.read_config(cfg_path)
-    project_path = os.path.dirname(os.path.realpath(cfg_path))
+    cfg = read_config(DLC_config)
+    project_path = os.path.dirname(os.path.realpath(DLC_config))
     print("Your model is stored in {}".format(project_path + "/" + "exported-models"))
 
     print("Done")
