@@ -39,7 +39,7 @@ jobs:
 
       - name: Build and Push Image
         env:
-          TAG: ${{ steps.tag.outputs.tags }}
+          TAG: latest
         run: |
           docker-compose build
           docker-compose push
