@@ -45,8 +45,7 @@ jobs:
 
       - name: Build Image
         env:
-          VERSION_TAG: ${{ steps.tag.outputs.tags }}
-          MAIN_TAG: ${{ steps.extract_branch.outputs.branch }}
+          TAG: ${{ steps.extract_branch.outputs.branch }}
         run: |
           docker-compose build
       
