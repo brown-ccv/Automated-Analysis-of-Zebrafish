@@ -1,5 +1,11 @@
 name: Build and PushContainer
-on: [push]
+on: 
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - 'main'
 
 env:
   REGISTRY: ghcr.io
@@ -37,9 +43,14 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
-      - name: Build and Push Image
+      - name: Build Image
         env:
-          TAG: latest
+          VERSION_TAG: ${{ steps.tag.outputs.tags }}
+          MAIN_TAG: ${{ steps.extract_branch.outputs.branch }}
         run: |
           docker-compose build
+      
+      - name: Push Image
+        if: ${{ steps.extract_branch.outputs.branch == 'main' && github.event_name != 'pull_request'}}
+        run: |
           docker-compose push
