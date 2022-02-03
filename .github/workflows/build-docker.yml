@@ -51,5 +51,7 @@ jobs:
       
       - name: Push Image
         if: ${{ steps.extract_branch.outputs.branch == 'main' && github.event_name != 'pull_request'}}
+        env:
+          TAG: ${{ steps.extract_branch.outputs.branch }}
         run: |
           docker-compose push
