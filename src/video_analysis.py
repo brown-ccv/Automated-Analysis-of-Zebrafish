@@ -185,6 +185,12 @@ class analysis:
     def __label_wells(self, wells):
         '''
             Label the (x, y) coordinates for each well
+
+            input :
+                wells : pandas dictionary of detected wells
+
+            output :
+                wells : pandas dictionary with labelled wells
         '''
 
 

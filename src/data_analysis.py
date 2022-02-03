@@ -1,9 +1,12 @@
 import numpy as np
 import pandas as pd
 
+# Routines required to run post prediction analysis
 
 def move_threshhold(distance, lower_bound, upper_bound):
-    
+    '''
+        Logical to define zebrafish move
+    '''
     if distance != distance:
         return np.nan
     
@@ -13,7 +16,9 @@ def move_threshhold(distance, lower_bound, upper_bound):
         return 0
 
 def up_or_down(row):
-    
+    '''
+        Logical to check  if zebrafish is in top or bottom of well
+    '''
     if row['Y'] != row['Y']:
         return np.nan
     
@@ -23,7 +28,9 @@ def up_or_down(row):
         return 0
     
 def get_well_no(row, xd, yd):
-
+    '''
+        Convert (x,y) coordinate of well into single integer
+    '''
     xmod = row['Xcor'] % xd
     ymod = row['Ycor'] % yd
     x = row['Xcor'] // xd
@@ -32,16 +39,23 @@ def get_well_no(row, xd, yd):
     return ((xmod+1) + ymod*xd + y * xd * yd + x * xd * yd * 2)
 
 def get_midpoint(p1, p2):
+    '''
+        Midpoint of the well
+    '''
     return (p1+p2)/2
 
 def get_orientation(RE, LE, Y):
-    
+    '''
+        Get orientation of zebrafish
+    '''
     midpt = get_midpoint(RE, LE)
     diff = midpt - Y
     return np.arctan2(diff[1], diff[0])*180/np.pi
 
 def get_change_in_orientation(value):
-    
+    '''
+        Get change in orientation in degrees
+    '''
     if value < -180:
         return value + 360
     elif value > 180:
@@ -50,7 +64,40 @@ def get_change_in_orientation(value):
         return value
 
 def analyze_df(observations, wells):
+    '''
+        Get Zebrafish behaviours from predictions
 
+        input: 
+            observations: predictions of zebrafish locations by the model
+            wells: pandas dictionary of location of wells
+
+        Output:
+            observations: pandas dictionary of zebrafish behaviours
+                Description of behaviours:
+                    X : Location of zebrafish (X-coordinate)
+                    Y : Location of zebrafish (Y-coordinate)
+                    Image: Image number
+                    Period: Period of stimulation
+                    Well: well number
+                    Xmid: midpoint of the well (X-coordinate)
+                    Ymid: midpoint of the well (Y-coordinate)
+                    Move: Zebrafish moved between current and previous image (Logical)
+                    Up: Zebrafish is in top of well (Logical)
+                    Speed: speed of the zebrafish
+                    CW: orientation of zebrafish (Logical)
+                    Change in orientation: change in orientation of zebrafish (degrees)
+                    Edge: Check if the zebrafish on edge of well (Logical)
+                    Scoot: Short movements by zebrafish (Logical)
+                    Burst: Long movements by zebrafisg (Logical)
+                    XLE: Location of left eye (X-coordinate) 
+                    YLE: Location of left eye (Y-coordinate) 
+                    XRE: Location of right eye (X-coordinate)
+                    YRE: Location of right eye (Y-coordinate)
+                    prob_LE: Prediction probability for left eye
+                    prob_RE: Prediction probability for right eye
+                    prob_Y: Prediction probability for yolk
+                    p_Edge: distance of zebrafish from center of well
+    '''
     xd, yd = 12, 8
 
     radius = wells['radius'].mean()
@@ -92,7 +139,34 @@ def analyze_df(observations, wells):
     observations.sort_values(['Image', 'Well'], inplace = True)
     observations.reset_index(drop=True, inplace=True)
 
-    return (observations[['Label', 'Area', 'X', 'Y', 'MinThr', 'MaxThr', 'Image', 'Period', 
-                          'Well', 'Xmid', 'Ymid', 'Exp', 'Move', 'Up', 'Speed', 'CW', 'Change in orientation','Edge',
-                          'Scoot', 'Burst', 'XLE', 'YLE', 'XRE', 'YRE', 'prob_LE', 'prob_RE', 
-                          'prob_Y', 'p_Edge']])
+    return (
+        observations[[
+            'Label', 
+            'Area', 
+            'X', 
+            'Y', 
+            'MinThr', 
+            'MaxThr', 
+            'Image', 
+            'Period', 
+            'Well', 
+            'Xmid', 
+            'Ymid', 
+            'Exp', 
+            'Move', 
+            'Up', 
+            'Speed', 
+            'CW', 
+            'Change in orientation',
+            'Edge',
+            'Scoot', 
+            'Burst', 
+            'XLE', 
+            'YLE', 
+            'XRE', 
+            'YRE', 
+            'prob_LE', 
+            'prob_RE', 
+            'prob_Y', 
+            'p_Edge'
+        ]])

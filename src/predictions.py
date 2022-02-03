@@ -13,6 +13,15 @@ from video_analysis import analysis
 class predict:
 
     def __init__(self, data, analysis, model_path):
+        '''
+            This class contains routines to predict zebrafish locations inside 
+            images given a DLC model
+
+                input:
+                    data: An instantiation of Data class
+                    analysis: An instantiation of Analysis class
+                    model_path: location of a frozen DLC model
+        '''
 
         def load_graph(frozen_graph_filename):
 
@@ -28,13 +37,29 @@ class predict:
         self.__graph = load_graph(model_path)
 
     def predict(self, wells, image = None):
+        '''
+            Predict the location of zebrafish inside images
+
+            input:
+                wells: pandas dictionary of well locations
+
+            output: 
+                predictions: pandas dictionary of predicted images
+        '''
+
         from scipy import stats
 
         def get_area(x,y):
+            '''
+                Area occupied by zebrafish in pixels
+            '''
             area=0.5*( (x[0]*(y[1]-y[2])) + (x[1]*(y[2]-y[0])) + (x[2]*(y[0]-y[1])) )
             return np.abs(area)
 
         def predict_image(image, wells, sess, input, output):
+            '''
+                Predict a single image
+            '''
 
             well_ind, data = self.__analysis.crop_wells(wells, image)
             predictions = sess.run(output, feed_dict = {input : data})
@@ -107,6 +132,9 @@ class predict:
 
 
     def get_session(self):
+        '''
+            Get a tensorflow session
+        '''
         sess = tf.Session(graph=self.__graph)
         output = sess.graph.get_tensor_by_name("import/concat_1:0")
         input = sess.graph.get_tensor_by_name("import/Placeholder:0")
