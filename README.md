@@ -35,7 +35,7 @@ Use the training container to train a new model. Training is intended to be done
 
 #### Option 2 (Singularity) :
 1. Log into a VNC session (a GUI interface is required for training purposes)
-2. Build singularity image on HPC cluster, `singularity build training.simg ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
+2. Build singularity image on HPC cluster, `singularity build training.simg docker://ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
 3. Launch the singularity container `singularity shell -B <path_to_zebrafish_images>:/images training.simg`
 4. Launch the Jupyter Notebook `jupyter-notebook`
 
@@ -57,7 +57,7 @@ Use the inference container to get predictions on new data. Once you have saved 
 
 #### Option 2 (Singularity):
 
-1. Build singularity image on HPC cluster, `singularity build inference.simg ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
+1. Build singularity image on HPC cluster, `singularity build inference.simg docker://ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
 2. Launch the inference script inside Singularity 
     ```
     singularity run \
