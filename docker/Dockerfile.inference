@@ -5,4 +5,4 @@ COPY ["./src", "./examples", "./docker/requirements.inference", "./"]
 RUN pip install -r requirements.inference
 ENV PYTHONPATH "${PYTHONPATH}:./src"
 
-ENTRYPOINT ["/bin/bash"]
+CMD ["python", "examples/inference_script.py", "$@"]

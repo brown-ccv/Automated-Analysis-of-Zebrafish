@@ -13,25 +13,25 @@ An overview of the workflow is given  in the image below. Check the jupyter-note
 The code base for training a new model and getting predictions via those models are provided as docker containers. Follow the instructions below to train new model or get predictions
 
 Required software:
-1. Docker[https://docs.docker.com/get-docker/] (for personal laptops)
+1. [Docker](https://docs.docker.com/get-docker/) (for personal laptops)
 2. Singularity (for running on HPC clusters)
 
 ### Training
 
-Use the training container to train a new model. Training is intended to be done via Jupyter Notebooks. An example training workflow is provided here[examples/DeepLabCur_training_book.ipynb]
+Use the training container to train a new model. Training is intended to be done via Jupyter Notebooks. An example training workflow is provided [here](examples/DeepLabCur_training_book.ipynb)
 
 #### Option 1 (Docker):
 1. Pull docker image using `docker pull ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:latest`
 2. Launch a jupypter notebook via docker 
     ```
-    export DLCPORT=8888 \
+    export DLCPORT=8888
     docker run -p 127.0.0.1:${DLCPORT}:8888 \
     -v <path_to_zebrafish_images>:/images \
     -it --rm ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:latest
    ```
-3. Open the training notebook at http://127.0.0.1:${DLCPORT}
+3. Open the training notebook at http://127.0.0.1:8888
 
-> Note use a different port if port 8888 is already in use.
+> Note use a different port if port `8888` is already in use.
 
 #### Option 2 (Singularity) :
 1. Log into a VNC session (a GUI interface is required for training purposes)
@@ -69,3 +69,7 @@ Use the inference container to get predictions on new data. Once you have saved 
 ## Code Contributors
 
 Rohit Kakodkar
+
+## References
+1. [Analysis of vertebrate vision in a 384-well imaging system](https://pubmed.ncbi.nlm.nih.gov/31562366/)
+2. [A zebrafish model for calcineurin-dependent brain function](https://pubmed.ncbi.nlm.nih.gov/34425181/)
