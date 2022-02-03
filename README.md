@@ -57,7 +57,7 @@ Use the inference container to get predictions on new data. Once you have saved 
 
 #### Option 2 (Singularity):
 
-1. Build singularity image on HPC cluster, `singularity build inference.simg docker://ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
+1. Build singularity image on HPC cluster, `singularity build inference.simg docker://ghcr.io/rkakodkar/automated-analysis-of-zebrafish/inference:main`
 2. Launch the inference script inside Singularity 
     ```
     singularity run \
