@@ -21,13 +21,13 @@ Required software:
 Use the training container to train a new model. Training is intended to be done via Jupyter Notebooks. An example training workflow is provided [here](examples/DeepLabCur_training_book.ipynb)
 
 #### Option 1 (Docker):
-1. Pull docker image using `docker pull ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:latest`
+1. Pull docker image using `docker pull ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
 2. Launch a jupypter notebook via docker 
     ```
     export DLCPORT=8888
     docker run -p 127.0.0.1:${DLCPORT}:8888 \
     -v <path_to_zebrafish_images>:/images \
-    -it --rm ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:latest
+    -it --rm ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main
    ```
 3. Open the training notebook at http://127.0.0.1:8888
 
@@ -35,7 +35,7 @@ Use the training container to train a new model. Training is intended to be done
 
 #### Option 2 (Singularity) :
 1. Log into a VNC session (a GUI interface is required for training purposes)
-2. Build singularity image on HPC cluster, `singularity build training.simg ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:latest`
+2. Build singularity image on HPC cluster, `singularity build training.simg ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
 3. Launch the singularity container `singularity shell -B <path_to_zebrafish_images>:/images training.simg`
 4. Launch the Jupyter Notebook `jupyter-notebook`
 
@@ -44,20 +44,20 @@ Use the training container to train a new model. Training is intended to be done
 Use the inference container to get predictions on new data. Once you have saved your trained model in model_zoo folder, launch `examples/inference_script.py` from inside the inference container
 
 #### Option 1 (Docker):
-1. Pull docker image using `docker pull ghcr.io/rkakodkar/automated-analysis-of-zebrafish/inference:latest`
+1. Pull docker image using `docker pull ghcr.io/rkakodkar/automated-analysis-of-zebrafish/inference:main`
 2. Launch the inference script inside docker 
     ```
     docker run -d \
     -v <path_to_zebrafish_images>:/images \
     -v <path_to_model_directory>:/models \
-    ghcr.io/rkakodkar/automated-analysis-of-zebrafish/inference:latest \
+    ghcr.io/rkakodkar/automated-analysis-of-zebrafish/inference:main \
     <min_radius> <max_radius> /images /models/<model_name>
     ```
 3. Results should be generated in same directory as images
 
 #### Option 2 (Singularity):
 
-1. Build singularity image on HPC cluster, `singularity build inference.simg ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:latest`
+1. Build singularity image on HPC cluster, `singularity build inference.simg ghcr.io/rkakodkar/automated-analysis-of-zebrafish/training:main`
 2. Launch the inference script inside Singularity 
     ```
     singularity run \
