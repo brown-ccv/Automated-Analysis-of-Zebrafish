@@ -71,5 +71,10 @@ class Data:
         return frame.shape
 
     def get_total_frames(self):
+        '''
+            Get total number of frames
 
+            output :
+                total frames in the imaging set
+        '''
         return int(self.__iterator.get(cv2.CAP_PROP_FRAME_COUNT))
