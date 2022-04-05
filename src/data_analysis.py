@@ -63,7 +63,19 @@ def get_change_in_orientation(value):
     else:
         return value
 
-def analyze_df(observations, wells):
+def get_upward(row):
+    """
+        Check if zebrafish is facing upward
+    """
+
+    Yeyes = (row['YLE'] + row['YRE'])/2
+
+    if (Yeyes < row['Y']):
+        return 100
+    else:
+        return 0
+
+def analyze_df(observations, wells, starting_image):
     '''
         Get Zebrafish behaviours from predictions
 
@@ -88,7 +100,7 @@ def analyze_df(observations, wells):
                     Change in orientation: change in orientation of zebrafish (degrees)
                     Edge: Check if the zebrafish on edge of well (Logical)
                     Scoot: Short movements by zebrafish (Logical)
-                    Burst: Long movements by zebrafisg (Logical)
+                    Burst: Long movements by zebrafish (Logical)
                     XLE: Location of left eye (X-coordinate) 
                     YLE: Location of left eye (Y-coordinate) 
                     XRE: Location of right eye (X-coordinate)
@@ -101,12 +113,14 @@ def analyze_df(observations, wells):
     xd, yd = 12, 8
 
     radius = wells['radius'].mean()
-    observations['Label'] = np.nan
     observations['Xmid'] = wells['radius'].mean()
     observations['Ymid'] = wells['radius'].mean()
+    observations.rename(columns = {'frame':'Label'}, inplace = True)
     observations.rename(columns = {'yolk_y':'Y', 'yolk_x':'X'}, inplace = True)
     observations.rename(columns = {'right_eye_y' : 'YRE', 'right_eye_x': 'XRE', 'left_eye_y': 'YLE', 'left_eye_x': 'XLE'}, inplace = True)
     observations['Image'] = observations.index.get_level_values(0)
+    observations['Label'] = observations.apply(lambda row: row['Image']+starting_image, axis = 1)
+    observations['Label'] = observations.apply(lambda row: "IMG_{:04d}".format(int(row['Label'])), axis = 1)
     observations['Xcor'] = observations.index.get_level_values(1)
     observations['Ycor'] = observations.index.get_level_values(2)
     observations['MinThr'] = np.nan
@@ -121,18 +135,25 @@ def analyze_df(observations, wells):
     observations['Move'] = observations.apply(lambda row: move_threshhold(row['Speed'], 3, np.Inf), axis = 1)
     observations['Scoot'] = observations.apply(lambda row: move_threshhold(row['Speed'], 3, 20), axis = 1)
     observations['Burst'] = observations.apply(lambda row: move_threshhold(row['Speed'], 20, np.Inf), axis = 1)
+    observations['B_Up'] = np.nan
+    observations['B_Up'] = observations['Up'].loc[observations['Burst'] == 100]
     observations['CW'] = (((observations['YRE'] - observations['Ymid'])**2 + (observations['XRE'] - observations['Xmid'])**2) < 
                                     ((observations['YLE'] - observations['Ymid'])**2 + (observations['XLE'] - observations['Xmid'])**2))
     observations['CW'] = observations['CW'].astype(int) * 100
-    observations['Orientation'] = observations.apply(lambda row: get_orientation(
-                                                                    RE = np.array([row['XRE'], row['YRE']]),
-                                                                    LE = np.array([row['XLE'], row['YLE']]),
-                                                                    Y = np.array([row['X'], row['Y']])),
-                                                                axis = 1)
-    observations['Absolute change in orientation'] = (observations['Orientation'] - 
-                                                      observations['Orientation'].shift(len(wells)))
-    observations['Change in orientation'] = observations.apply(lambda row: get_change_in_orientation(row['Absolute change in orientation']), 
-                                                               axis = 1)
+    observations['Angle'] = observations.apply(lambda row: get_orientation(
+                                                    RE = np.array([row['XRE'], row['YRE']]),
+                                                    LE = np.array([row['XLE'], row['YLE']]),
+                                                    Y = np.array([row['X'], row['Y']])
+                                                    ),
+                                                axis = 1)
+    observations['Upw'] = observations.apply(lambda row: get_upward(row), axis = 1)
+    observations['Absolute Turn'] = (observations['Angle'] - 
+                                    observations['Angle'].shift(len(wells)))
+    observations['Turn'] = observations.apply(lambda row: get_change_in_orientation(
+                                                    row['Absolute Turn']
+                                                    ), 
+                                                axis = 1)
+    observations['Tabs'] = observations.apply(lambda row: abs(row['Turn']), axis = 1)
     observations['Edge'] = np.sqrt((observations['Y'] - observations['Ymid'])**2 + (observations['X'] - observations['Xmid'])**2)
     observations['p_Edge'] = observations['Edge'] > 50
     observations['p_Edge'] = observations['p_Edge'].astype(int)*100
@@ -149,24 +170,59 @@ def analyze_df(observations, wells):
             'MaxThr', 
             'Image', 
             'Period', 
-            'Well', 
-            'Xmid', 
+            'Well',
+            'Xmid',
             'Ymid', 
             'Exp', 
             'Move', 
-            'Up', 
-            'Speed', 
-            'CW', 
-            'Change in orientation',
+            'Up',
+            'Speed',
+            'Scoot',
+            'Burst',
+            'B_Up',
             'Edge',
-            'Scoot', 
-            'Burst', 
-            'XLE', 
-            'YLE', 
-            'XRE', 
-            'YRE', 
-            'prob_LE', 
-            'prob_RE', 
-            'prob_Y', 
-            'p_Edge'
+            'p_Edge',
+            'CW',
+            'Angle',
+            'Upw',
+            'Turn',
+            'Tabs',
+            'XLE',
+            'YLE',
+            'XRE',
+            'YRE',
+            'prob_LE',
+            'prob_RE',
+            'prob_Y'
         ]])
+        
+        # observations[[
+        #     'Label', 
+        #     'Area', 
+        #     'X', 
+        #     'Y', 
+        #     'MinThr', 
+        #     'MaxThr', 
+        #     'Image', 
+        #     'Period', 
+        #     'Well', 
+        #     'Xmid', 
+        #     'Ymid', 
+        #     'Exp', 
+        #     'Move', 
+        #     'Up', 
+        #     'Speed', 
+        #     'CW', 
+        #     'Change in orientation',
+        #     'Edge',
+        #     'Scoot', 
+        #     'Burst', 
+        #     'XLE', 
+        #     'YLE', 
+        #     'XRE', 
+        #     'YRE', 
+        #     'prob_LE', 
+        #     'prob_RE', 
+        #     'prob_Y', 
+        #     'p_Edge'
+        # ]])
