@@ -69,7 +69,7 @@ class analysis:
 
         return self.__label_wells(wells)
 
-    def plot_wells(self, wells, image = None):
+    def plot_wells(self, wells, image = None, img_file = None, R = []):
         '''
             Once you've detected the wells you can plot them using this function
 
@@ -92,6 +92,12 @@ class analysis:
         ax.imshow(image)
         for circle in wells:
             ax.add_artist(plt.Circle((circle[0], circle[1]), circle[2]))
+
+        if (len(R) != 0):
+            ax.text(0.5, 0.5, "Rmin = {}, Rmax = {}".format(int(R[0]), int(R[1])), fontsize=32)
+
+        if (img_file):
+            plt.savefig(img_file, format = 'png')
 
         plt.show()
 

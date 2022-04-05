@@ -16,10 +16,33 @@ from video_analysis import analysis
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--rmin', default = 72, help = 'Minimum radius of the well')
-    parser.add_argument('--rmax', default = 100, help = 'Maximum radius of the well')
-    parser.add_argument('--experiment_dir', type=str, help = "which folder would you like to analyze")
-    parser.add_argument('--model_name', type=str, help = "name of the model you want to use")
+    parser.add_argument(
+        '--rmin',
+        default = 72, 
+        help = 'Minimum radius of the well'
+        )
+    parser.add_argument(
+        '--rmax', 
+        default = 100, 
+        help = 'Maximum radius of the well'
+        )
+    parser.add_argument(
+        '--experiment_dir', 
+        type=str, 
+        help = "which folder would you like to analyze"
+        )
+    parser.add_argument(
+        '--model_name', 
+        type=str, 
+        help = "name of the model you want to use"
+        )
+    parser.add_argument(
+        '--starting_image', 
+        default=0, 
+        type=int, 
+        help = "Index for the starting image",
+        required = False
+        )
 
     return parser.parse_args()
 
@@ -34,11 +57,13 @@ if __name__ =='__main__':
     rmax = args.rmax
     experiment_dir = args.experiment_dir
     model_name = args.model_name
+    starting_image = args.starting_image
 
     image_folder = os.path.join(data_dir, user, experiment_dir)
 
     images = Data(image_folder + '/IMG_%04d.JPG')
     results_file = image_folder + '/results.csv'
+    img_file = image_folder + '/wells.png'
 
     model_path = os.path.join(pathlib.Path(__file__).parent.absolute(), '../model_zoo', model_name)
 
@@ -61,6 +86,8 @@ if __name__ =='__main__':
 
     wells = experiment.detect_wells(R = [rmin, rmax])
 
+    experiment.plot_wells(wells = wells, img_file = img_file, R = [rmin, rmax])
+
     print("Total number of wells detected = {}".format(len(wells)), flush = True)
 
     print("Running predictions. This will take a while!", flush = True)
@@ -69,7 +96,7 @@ if __name__ =='__main__':
 
     print("Anlysing and writing results to " + results_file, flush = True)
 
-    observations = analyze_df(predictions, wells)
+    observations = analyze_df(predictions, wells, starting_image)
     observations.to_csv(results_file)
 
     print("Done", flush = True)
