@@ -1,4 +1,4 @@
-# Automated Analysis of Zebrafish Behaviours
+# Z-LaP Tracker
 
 Automated analysis of zebrafish behaviours is a image processing framework to autonomously detect zebrafish locations and orientations in videos or images. Zebrafish model systems have been extensively utilized as a surrogate for understanding mammalian brain functions. One particular advantage of using zebrafish model system is due to low incubation period (5 days) and low footprint of zebrafish, this model system can be utilized to obtain high-throughput measurements. The goal of this project is to automate the characterization of zebrafish behaviours using deep learning. We currently use the location and orientation data over the length of the experiment to extrapolate higher level behavious like resting time, speed, time spent in top of well etc.
 
